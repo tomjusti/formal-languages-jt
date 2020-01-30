@@ -28,13 +28,10 @@
 (define reachable
   (lambda (x res)
     (cond
-      [(null? x) '()]
+      [(null? x) res]
       [(and (member? (caar x) res) (not (member? (caddar x) res))) (reachable (cdr x) (cons (caddar x) res))]
-      [else (reachable (cdr x) res)])
-    res))
+      [else (reachable (cdr x) res)])))
 
-
-
-(check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) '(Q0 Q1))
+(check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) '(Q1 Q0))
 
 (test)
