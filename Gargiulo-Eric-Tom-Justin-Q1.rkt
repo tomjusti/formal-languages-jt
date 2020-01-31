@@ -35,8 +35,9 @@
 (check-expect (member? 4 '(1 2 3)) #f)
 (check-expect (member? 4 '()) #f)
 
-; x is a list of rules
-; res is a list of start and final states
+;; reachable: (list of rules), (list of sm-getstart) -> (list of reachable states)
+;; Purpose: to return a list of reachable states
+;; Accumulative Invariant: res is the list of reachable states
 (define reachable
   (lambda (x res)
     (cond
@@ -47,6 +48,8 @@
 (check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) '(Q1 Q0))
 (check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ1))) '(ds Q2))
 
-(remove* (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) (map car (sm-getrules QUIZ)))
+;; Purpose: to return a list of unreachable states
+(define unreachable
+  (remove* (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) (map car (sm-getrules QUIZ))))
 
 (test)
