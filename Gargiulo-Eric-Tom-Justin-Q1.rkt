@@ -46,10 +46,15 @@
       [else (reachable (cdr x) res)])))
 
 (check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) '(Q1 Q0))
-(check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ1))) '(ds Q2))
+(check-expect (reachable (sm-getrules QUIZ1) (list (sm-getstart QUIZ1))) '(ds Q2))
 
+;; unreachable: dfa -> (list of unreachable states)
 ;; Purpose: to return a list of unreachable states
 (define unreachable
-  (remove* (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) (map car (sm-getrules QUIZ))))
+  (lambda (dfa)
+    (remove* (reachable (sm-getrules dfa) (list (sm-getstart dfa))) (map car (sm-getrules dfa)))))
+
+(check-expect (unreachable QUIZ) '(Q2 ds ds Q2))
+(check-expect (unreachable QUIZ1) '(Q0 Q0 Q1 Q1))
 
 (test)
