@@ -13,6 +13,17 @@
               (Q1 a Q1)
               (Q1 b Q0))))
 
+(define QUIZ1
+  (make-dfa '(Q0 Q1 Q2)
+            '(a b)
+            'Q2
+            '(Q0)
+            '((Q2 a Q2)
+              (Q0 a Q0)
+              (Q0 b Q1)
+              (Q1 a Q1)
+              (Q1 b Q0))))
+
 (define member?
   (lambda (x lst)
     (cond
@@ -22,6 +33,7 @@
 
 (check-expect (member? 3 '(1 2 3)) #t)
 (check-expect (member? 4 '(1 2 3)) #f)
+(check-expect (member? 4 '()) #f)
 
 ; x is a list of rules
 ; res is a list of start and final states
@@ -33,5 +45,8 @@
       [else (reachable (cdr x) res)])))
 
 (check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) '(Q1 Q0))
+(check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ1))) '(ds Q2))
+
+(remove* (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) (map car (sm-getrules QUIZ)))
 
 (test)
