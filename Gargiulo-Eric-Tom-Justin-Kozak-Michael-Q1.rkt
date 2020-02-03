@@ -52,9 +52,9 @@
 ;; Purpose: to return a list of unreachable states
 (define unreachable
   (lambda (dfa)
-    (remove* (reachable (sm-getrules dfa) (list (sm-getstart dfa))) (map car (sm-getrules dfa)))))
+    (remove-duplicates (remove* (reachable (sm-getrules dfa) (list (sm-getstart dfa))) (map car (sm-getrules dfa))))))
 
-(check-expect (unreachable QUIZ) '(Q2 ds ds Q2))
-(check-expect (unreachable QUIZ1) '(Q0 Q0 Q1 Q1))
+(check-expect (unreachable QUIZ) '(Q2 ds))
+(check-expect (unreachable QUIZ1) '(Q0 Q1))
 
 (test)
