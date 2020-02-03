@@ -67,4 +67,7 @@
         (if (or (member? (caar lor) lou) (member? (caddar lor) lou)) (new-rules (cdr lor) lou)
             (cons (car lor) (new-rules (cdr lor) lou))))))
 
+(check-expect (new-rules (sm-getrules QUIZ) (unreachable QUIZ)) '((Q0 a Q0) (Q0 b Q1) (Q1 a Q1) (Q1 b Q0)))
+(check-expect (new-rules (sm-getrules QUIZ1) (unreachable QUIZ1)) '((Q2 a Q2) (ds a ds) (ds b ds) (Q2 b ds)))
+
 (test)
