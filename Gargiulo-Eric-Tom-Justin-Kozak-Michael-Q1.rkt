@@ -24,12 +24,14 @@
               (Q1 a Q1)
               (Q1 b Q0))))
 
+;; member?: x, (list of x) -> boolean
+;; Purpose: to return a boolean if a specific element is in a list
 (define member?
-  (lambda (x lst)
+  (lambda (element lst)
     (cond
       [(empty? lst) #f]
-      [(eqv? x (car lst)) #t]
-      [else (member? x (cdr lst))])))
+      [(eqv? element (car lst)) #t]
+      [else (member? element (cdr lst))])))
 
 (check-expect (member? 3 '(1 2 3)) #t)
 (check-expect (member? 4 '(1 2 3)) #f)
@@ -39,11 +41,11 @@
 ;; Purpose: to return a list of reachable states
 ;; Accumulative Invariant: res is the list of reachable states
 (define reachable
-  (lambda (x res)
+  (lambda (lor res)
     (cond
-      [(null? x) res]
-      [(and (member? (caar x) res) (not (member? (caddar x) res))) (reachable (cdr x) (cons (caddar x) res))]
-      [else (reachable (cdr x) res)])))
+      [(null? lor) res]
+      [(and (member? (caar lor) res) (not (member? (caddar lor) res))) (reachable (cdr lor) (cons (caddar lor) res))]
+      [else (reachable (cdr lor) res)])))
 
 (check-expect (reachable (sm-getrules QUIZ) (list (sm-getstart QUIZ))) '(Q1 Q0))
 (check-expect (reachable (sm-getrules QUIZ1) (list (sm-getstart QUIZ1))) '(ds Q2))
@@ -56,5 +58,13 @@
 
 (check-expect (unreachable QUIZ) '(Q2 ds))
 (check-expect (unreachable QUIZ1) '(Q0 Q1))
+
+;; new-rules: (list of rules) (list of unreachable states) -> (list of rules)
+;; Purpose: to return a list of new rules that do not involve the useless unreachable states
+(define new-rules
+  (lambda (lor lou)
+    (if (null? lor) lor
+        (if (or (member? (caar lor) lou) (member? (caddar lor) lou)) (new-rules (cdr lor) lou)
+            (cons (car lor) (new-rules (cdr lor) lou))))))
 
 (test)
