@@ -65,7 +65,7 @@
 
 ;; reachable: (list of rules), (list of sm-getstart) -> (list of reachable states)
 ;; Purpose: to return a list of reachable states
-;; Accumulative Invariant: res is the list of reachable states
+;; Accumulator Invariant: res is the list of reachable states
 (define reachable
   (lambda (lor res)
     (cond
@@ -79,7 +79,7 @@
 (check-expect (reachable (sm-getrules QUIZ3) (list (sm-getstart QUIZ2))) '(ds Q2 Q1 Q0))
 
 ;; unreachable: dfa -> (list of unreachable states)
-;; Purpose: to return a list of unreachable states
+;; Purpose: to return a list of the unreachable states in dfa
 (define unreachable
   (lambda (dfa)
     (remove-duplicates (remove* (reachable (sm-getrules dfa) (list (sm-getstart dfa))) (map car (sm-getrules dfa))))))
@@ -90,7 +90,7 @@
 (check-expect (unreachable QUIZ3) '(Q3))
 
 ;; new-rules: (list of rules) (list of unreachable states) -> (list of rules)
-;; Purpose: to return a list of new rules that do not involve the useless unreachable states
+;; Purpose: to return a list of new rules that do not involve the unreachable states
 (define new-rules
   (lambda (lor lou)
     (if (null? lor) lor
@@ -101,5 +101,12 @@
 (check-expect (new-rules (sm-getrules QUIZ1) (unreachable QUIZ1)) '((Q2 a Q2) (ds a ds) (ds b ds) (Q2 b ds)))
 (check-expect (new-rules (sm-getrules QUIZ2) (unreachable QUIZ2)) '((Q0 a Q1) (Q0 b Q3) (Q1 a Q1) (Q1 b Q2) (Q2 b Q2) (Q2 a Q3) (Q3 a Q3) (Q3 b Q3)))
 (check-expect (new-rules (sm-getrules QUIZ3) (unreachable QUIZ3))  '((Q0 a Q1) (Q1 a Q1) (Q1 b Q2) (Q2 b Q2) (ds a ds) (ds b ds) (Q0 b ds) (Q2 a ds)))
+
+;; PROOF
+;; Let A and B be dfa's
+;; Prove: (reachable (dfa B)) == (dfa A) where (dfa B) = {dfa A, n unreachable states} and (dfa A) has no unreachable states
+;; Base Case: n == 0
+;; A has 0 unreachable states, 0 are removed, resulting in B == A
+;; dfa B = {dfa A, (n+1) unreachable states} = {{dfa A, (n) unreachable states}, 1 unreachable state} = {dfa A, 1 unreachable state}
 
 (test)
