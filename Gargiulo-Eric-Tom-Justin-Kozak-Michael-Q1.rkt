@@ -1,3 +1,7 @@
+;; Formal Languages
+;; Quiz 1
+;; Eric Gargiulo, Justin Tom & Michael Kozak
+
 #lang racket
 (require fsm)
 (require test-engine/racket-tests)
@@ -174,11 +178,40 @@
 (sm-testequiv? QUIZ3 QUIZ3_)
 (sm-testequiv? QUIZ4 QUIZ4_)
 
-;; PROOF
+;; PROOF:
+
 ;; Let A and B be dfa's
-;; Prove: (reachable (dfa B)) == (dfa A) where (dfa B) = {dfa A, n unreachable states} and (dfa A) has no unreachable states
-;; Base Case: n == 0
-;; A has 0 unreachable states, 0 are removed, resulting in B == A
-;; dfa B = {dfa A, (n+1) unreachable states} = {{dfa A, (n) unreachable states}, 1 unreachable state} = {dfa A, 1 unreachable state}
+;; Let n be a non-negative integer
+;; B = {A, n unreachable states}
+;; A has no unreachable states
+;; Prove that (reachable B) == A
+
+;; BASE CASE: n = 0
+
+;; B = {A, 0 unreachable states}
+;; B has no unreachable states and A has no unreachable states
+;; B == A
+;; There are no unreachable states to remove
+;; Therefore: (reachable B) == A
+
+;; INDUCTION STEP: Assume true for n = k, show true for n = k + 1
+
+;; ASSUME:
+
+;; B = {A, k unreachable states}
+;; A has no unreachable states
+;; (reachable B) == A
+
+;; SHOW:
+
+;; {B, 1 unreachable state} = {A, k + 1 unreachable states}
+;; A has no unreachable states
+;; (reachable {B, 1 unreachable state}) ==  A
+
+;; {B, 1 unreachable state} = {A, k + 1 unreachable states}
+;; {A, k + 1 unreachable states} = {{A, k unreachable states}, 1 unreachable state}
+;; By assumption, {A, k unreachable states} = B
+;; {{A, k unreachable states}, 1 unreachable state} = {B, 1 unreachable state}
+;; Therefore: (reachable {B, 1 unreachable state}) ==  A
 
 (test)
