@@ -132,7 +132,7 @@
 
 ;; reachable: (list of rules), (list of sm-getstart) -> (list of reachable states)
 ;; Purpose: to return a list of reachable states
-;; Accumulator Invariant: res is the list of reachable states
+;; Accumulative Invariant: res is the list of reachable states
 (define reachable
   (lambda (lor res)
     (cond
