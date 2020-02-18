@@ -145,6 +145,24 @@
 
 (sm-testequiv? TWO-TWO-SEVEN-B N)
 
+(define TWO-TWO-EIGHT-A
+  (make-ndfa
+   '(Q0 Q1 Q2 Q3 Q4 Q5)
+   '(a b)
+   'Q0
+   '(Q5)
+   `((Q0 a Q0)
+     (Q0 b Q0)
+     (Q0 a Q1)
+     (Q1 a Q2)
+     (Q1 b Q2)
+     (Q2 a Q3)
+     (Q2 b Q3)
+     (Q3 a Q4)
+     (Q3 b Q4)
+     (Q4 a Q5)
+     (Q4 b Q5))))
+
 (define TWO-TWO-NINE-A
   (make-ndfa
    '(Q0 Q1 Q2 Q3 Q4)
@@ -173,6 +191,7 @@
      (Q1 b Q1)
      (Q2 a Q2)
      (Q2 b Q1))))
+
 
 (sm-testequiv? TWO-TWO-NINE-A TWO-TWO-NINE-A_)
 
