@@ -14,3 +14,24 @@
                                                (sm-getalphabet new-m2))))
          (new-finals (append (sm-getfinals m1) (sm-getfinals new-m2))))
     (make-ndfa new-states new-sigma new-start new-finals new-rules)))
+
+(define A
+  (make-ndfa '(q0 q1)
+             '(a b)
+             'q0
+             '(q1)
+             '((q0 a q1))))
+
+(define B
+  (make-ndfa '(q0 q1)
+           '(a b)
+           'q0
+           '(q1)
+           '((q0 a q1))))
+
+; starting state/new final state
+; all states that are not the start state
+; remove duplicate ds from the states
+; new rules to return to the starting state on EMP for prefix
+; all the rules for the machine plus the new rules added
+; new list of final states
