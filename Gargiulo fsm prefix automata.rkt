@@ -117,19 +117,24 @@
 ; Let q be the start state of A
 ; let F be the set of final states of A
 ; let F' be the set of final states for A'
-; let N(x, y) be every state on the path from x to y
-; let k be the state
+; let N(x, y) be y steps from x on all paths to the final state of a machine
+; let k be the number of states in A
 
 ; BASE CASE:
-; L is length 0
+; L has length 0
 ; Prefix(L) = '()
 ; F' = F
 
-; INDUCTIVE STEP:
+; ASSUME:
+; L is length k
 ; F' = F U N(q, k-1)
 
-; SHOW:
-; F' = F U N(q, k)
+; INDUCTIVE STEP:
+; F' = N(q, k)
 ; N(q, k) is all states from q to k
+; thus A' accepts any prefix of an accepting word in the language of A (L)
+; thus L' is closed under Prefix
+
+
 
 (test)
