@@ -222,7 +222,7 @@
 -1 2 1 #"\0"
 0 -1 1 #"\0"
 1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 200 0 0 0 0 0 -1 -1
-          0 542 0 28 3 12 #"#lang racket"
+          0 556 0 28 3 12 #"#lang racket"
 0 0 24 29 1 #"\n"
 0 0 24 3 1 #"("
 0 0 15 3 7 #"require"
@@ -232,6 +232,10 @@
 0 0 24 29 1 #"\n"
 0 0 24 29 1 #"\n"
 0 0 24 29 1 #"\n"
+0 0 17 3 22 #"; X (listof X) -> bool"
+0 0 24 29 1 #"\n"
+0 0 17 3 63
+#"; return true if (eqv? X Y) where Y is an element of (listof X)"
 0 0 24 29 1 #"\n"
 0 0 24 3 1 #"("
 0 0 15 3 6 #"define"
@@ -283,6 +287,9 @@
 0 0 24 29 1 #"\n"
 0 0 24 29 1 #"\n"
 0 0 17 3 20 #"; ndfa -> listof sym"
+0 0 24 29 1 #"\n"
+0 0 17 3 68
+#"; return a list of all reachable states from the start state of ndfa"
 0 0 24 29 1 #"\n"
 0 0 24 3 1 #"("
 0 0 15 3 6 #"define"
@@ -355,8 +362,12 @@
 0 0 14 3 1 #"i"
 0 0 24 3 1 #" "
 0 0 21 3 1 #"1"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
+0 0 24 3 3 #")) "
+0 0 17 3 110
+(4
+ #"; whenever a pass is completed, i is decreased. At most, recursion c"
+ #"an occur one time per state in the machine"
+) 0 0 24 29 1 #"\n"
 0 0 24 3 30 #"                             ("
 0 0 14 3 9 #"reach-aux"
 0 0 24 3 1 #" "
@@ -436,6 +447,17 @@
 0 0 24 29 1 #"\n"
 0 0 24 29 1 #"\n"
 0 0 17 3 24 #"; sym ndfa -> listof sym"
+0 0 24 29 1 #"\n"
+0 0 17 3 84
+(5
+ #"; return a list of all states in ndfa that are on a path to the fina"
+ #"l states of ndfa"
+) 0 0 24 29 1 #"\n"
+0 0 17 3 125
+(6
+ #"; (these are made final states in the prefix ndfa, as any state not "
+ #"on a path to final would not be reached by a valid prefix"
+) 0 0 17 3 1 #")"
 0 0 24 29 1 #"\n"
 0 0 24 3 1 #"("
 0 0 15 3 6 #"define"
@@ -987,4 +1009,7 @@
 0 0 14 3 2 #"to"
 0 0 24 3 1 #" "
 0 0 14 3 1 #"k"
-0           0 0           0
+0           0 0 0 24 29 1 #"\n"
+0 0 24 29 1 #"\n"
+0 0 24 29 1 #"\n"
+0           0
