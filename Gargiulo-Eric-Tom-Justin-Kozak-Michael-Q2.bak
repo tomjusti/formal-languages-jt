@@ -65,9 +65,7 @@
                 [(empty? r) (begin
                               (set! i (- i 1))
                               (reach-aux rules visited))] ;; list of rules has been scanned, reset rules for another pass
-                [(and (member? (caddar r) visited)
-                      (not (member? (caar r) visited))
-                      (member? (caar r) reachable)) (reach-aux (cdr r) (cons (caar r) visited))] ; found a member of visited pointing to a state not already visited
+                [(and (member? (caddar r) visited) (not (member? (caar r) visited)) (member? (caar r) reachable)) (reach-aux (cdr r) (cons (caar r) visited))] ; found a member of visited pointing to a state not already visited
                 [else ;; did not find member of visited
                  (reach-aux (cdr r) visited)])))
       (reach-aux rules (sm-getfinals ndfa)))))
