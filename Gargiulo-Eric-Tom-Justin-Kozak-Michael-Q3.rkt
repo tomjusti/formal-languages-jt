@@ -13,6 +13,24 @@
                (Q5 a Q4)
                (Q5 b Q4))))
 
+(define C
+  (make-ndfa '(Q0 Q1)
+             '(a b)
+             'Q0
+             '(Q1)
+             '((Q0 a Q1))))
+
+(define D
+  (make-ndfa '(Q0 Q1 Q2 Q3)
+             '(a b)
+             'Q0
+             '(Q1)
+             '((Q0 a Q1)
+               (Q1 b Q3)
+               (Q3 b Q3)
+               ;(Q3 a Q1)
+               (Q2 b Q0))))
+
 
 ;; member?: X, (list-of-X) -> boolean
 ;; Purpose: to return true if (eqv? X Y) where Y is an element of (listof X)
@@ -63,17 +81,71 @@
       (reach-aux rules (sm-getfinals ndfa)))))
 
 
-(define (returnsilly ndfa)
+; ndfa -> listof sym
+; return a list of rules of ndfa not containing "silly" rules
+;(define (nonsilly ndfa)
+;  (let*
+;      ((silly (reachable4 ndfa))
+;       (res '())
+;       (rules (sm-getrules ndfa)))
+;    (cond
+;      [(empty? silly) res]
+;      [(member? 
+
+;(define (nonsilly-grammar ndfa)
+;  (sm->grammar (make-ndfa (reachable4 ndfa)
+;                          (sm-getalphabet ndfa)
+;                          (sm-getstart ndfa)
+;                          (sm-getfinals ndfa)
+;                          (returnsilly ndfa))))
+
+(define DFA1 (make-dfa '(S U V T D)
+                       '(a b)
+                       'S
+                       '(S V T)
+                       `((S a U)
+                         (S b U)
+                         (U a V)
+                         (U b T)
+                         (V a D)
+                         (V b D)
+                         (T a D)
+                         (T b U)
+                         (D a D)
+                         (D b D))))
+
+(define (in-reach? x fa)
+  (not (member? x (path-to-final fa))))
+
+(define (sillystates ndfa)
+  (filter (in-reach? (sm-getstates ndfa) ndfa) (sm-getstates ndfa)))
+
+sillystates
+
+; listof sym listof sym -> bool
+; return true if any element of the first list appears in the second
+(define (member-aux? L1 L2)
+  (cond
+    [(empty? L1) #f]
+    [(member? (car L1) L2) #t]
+    [else (member-aux? (cdr L1) L2)]))
+
+(define (remove-silly ndfa)
   (let*
-      ((states (sm-getstates ndfa))
-       (reachable (reachable4 ndfa)))
-    (filter (lambda (x) (not (member? x reachable))) states)))
+      ((silly (filter (lambda (x) (not (member? x (path-to-final ndfa)))) (sm-getstates D)))
+       (rules (sm-getrules ndfa))
+       (newrules '()))
+    (local
+      [(define (remove-aux los lor)
+         (cond
+           [(empty? rules) newrules]
+           [(not (member-aux? silly rules)) (cons (car rules) newrules)] ; nonsilly rule found, added to newrules
+           [else (remove-aux los (cdr lor))]))]
+      (remove-aux silly rules))))
 
-(define (nonsilly-grammar ndfa)
-  (sm->grammar (make-ndfa (reachable4 ndfa)
-                          (sm-getalphabet ndfa)
-                          (sm-getstart ndfa)
-                          (sm-getfinals ndfa)
-                          (sm-getrules ndfa))))
+(define new-rules
+  (lambda (lor lou)
+    (if (null? lor) lor
+        (if (or (member? (caar lor) lou) (member? (caddar lor) lou)) (new-rules (cdr lor) lou)
+            (cons (car lor) (new-rules (cdr lor) lou))))))
 
-(returnsilly B)
