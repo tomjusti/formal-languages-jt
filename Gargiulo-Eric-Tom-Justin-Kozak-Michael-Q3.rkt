@@ -112,3 +112,33 @@
         (if (or (member? (caar lor) lou) (member? (caddar lor) lou)) (new-rules (cdr lor) lou)
             (cons (car lor) (new-rules (cdr lor) lou))))))
 
+;; PROOF
+;; let A and B be grammars
+;; let B = {A, n silly rules}
+;; let n be a non-negative integer representing the number of silly rules in A
+
+;; BASE CASE:
+;; n == 0
+;; B = {A, 0 silly rules}
+;; B has no silly rules and A has no silly rules
+;; B == A
+;; There are no silly rules to remove
+;; Therefore: (remove-silly B) == A
+
+;; ASSUME:
+;; B = {A, k silly rules}
+;; A has no silly rules
+;; (remove-silly B) == A
+
+;; SHOW:
+;; {B, 1 silly rule} = {A, k + 1 silly rules}
+;; A has no silly rules
+;; (remove-silly {B, 1 silly rule}) ==  A
+
+;; {B, 1 silly rule} = {A, k + 1 silly rules}
+;; {A, k + 1 silly rules} = {{A, k silly rules}, 1 silly rule}
+;; By assumption, {A, k silly rules} = B
+;; {{A, k silly rules}, 1 silly rule} = {B, 1 silly rule}
+;; Therefore: (remove-silly {B, 1 silly rule}) ==  A
+
+
