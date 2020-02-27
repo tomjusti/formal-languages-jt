@@ -1,5 +1,7 @@
 #lang racket
+
 (require fsm)
+(require test-engine/racket-tests)
 
 (define B
   (make-dfa '(Q0 Q1 Q2 Q3 Q4 Q5)
@@ -28,57 +30,7 @@
              '((Q0 a Q1)
                (Q1 b Q3)
                (Q3 b Q3)
-               ;(Q3 a Q1)
                (Q2 b Q0))))
-
-
-;; member?: X, (list-of-X) -> boolean
-;; Purpose: to return true if (eqv? X Y) where Y is an element of (listof X)
-(define member?
-  (lambda (element lst)
-    (cond
-      [(empty? lst) #f]
-      [(eqv? element (car lst)) #t]
-      [else (member? element (cdr lst))])))
-
-;; reachable4: dfa -> (list-of-sym)
-;; Purpose: to return a list of all reachable states from the start state of dfa
-(define (reachable4 dfa)
-  (let*
-      ((rules (sm-getrules dfa)) ; list of rules of the dfa
-       (i (length (sm-getstates dfa)))) ; used to limit recursion depth
-    (local ((define (reach-aux r visited)
-             (cond
-               [(zero? i) visited]
-               [(empty? r) (begin
-                             (set! i (- i 1)) ;; whenever a pass is completed, i is decreased
-                                              ;; at most, recursion can occur one time per state in the machine
-                             (reach-aux rules visited))] ;; list of rules has been scanned, reset rules for another pass
-               ;; found a member of visited pointing to a state not already visited
-               [(and (member? (caar r) visited) (not (member? (caddar r) visited))) (reach-aux (cdr r) (cons (caddar r) visited))]
-               [else ;; did not find member of visited
-                (reach-aux (cdr r) visited)])))
-      (reach-aux rules (list (sm-getstart dfa)))))) ;; "visited" only contains the start state by default
-
-
-;; path-to-final: sym, dfa -> (list-of-sym)
-;; Purpose: to return a list of all states in dfa that are on a path to the final states of dfa
-;; these are made final states in the prefix dfa, as any state not on a path to final would not be reached by a valid prefix
-(define (path-to-final dfa)
-  (let*
-      ((rules (sm-getrules dfa)) ;; list of rules of the dfa
-       (i (length (sm-getstates dfa))) ;; used to limit recursion depth
-       (reachable (reachable4 dfa)))
-    (local ((define (reach-aux r visited)
-              (cond
-                [(zero? i) visited]
-                [(empty? r) (begin
-                              (set! i (- i 1))
-                              (reach-aux rules visited))] ;; list of rules has been scanned, reset rules for another pass
-                [(and (member? (caddar r) visited) (not (member? (caar r) visited)) (member? (caar r) reachable)) (reach-aux (cdr r) (cons (caar r) visited))] ; found a member of visited pointing to a state not already visited
-                [else ;; did not find member of visited
-                 (reach-aux (cdr r) visited)])))
-      (reach-aux rules (sm-getfinals dfa)))))
 
 (define DFA1 (make-dfa '(S U V T D)
                        '(a b)
@@ -95,22 +47,89 @@
                          (D a D)
                          (D b D))))
 
+;; member?: X, (list-of-X) -> boolean
+;; Purpose: to return true if (eqv? X Y) where Y is an element of (listof X)
+(define member?
+  (lambda (element lst)
+    (cond
+      [(empty? lst) #f]
+      [(eqv? element (car lst)) #t]
+      [else (member? element (cdr lst))])))
+
+(check-expect (member? 3 '(1 2 3)) #t)
+(check-expect (member? 4 '(1 2 3)) #f)
+(check-expect (member? 4 '()) #f)
+
+;; reachable-states: dfa -> (list-of-sym)
+;; Purpose: to return a list of all reachable states from the start state of dfa
+(define (reachable-states dfa)
+  (let*
+      ((rules (sm-getrules dfa)) ; list of rules of the dfa
+       (i (length (sm-getstates dfa)))) ; used to limit recursion depth
+    (local ((define (reach-aux r visited)
+             (cond
+               [(zero? i) visited]
+               [(empty? r) (begin
+                             (set! i (- i 1)) ;; whenever a pass is completed, i is decreased
+                                              ;; at most, recursion can occur one time per state in the machine
+                             (reach-aux rules visited))] ;; list of rules has been scanned, reset rules for another pass
+               ;; found a member of visited pointing to a state not already visited
+               [(and (member? (caar r) visited) (not (member? (caddar r) visited))) (reach-aux (cdr r) (cons (caddar r) visited))]
+               [else ;; did not find member of visited
+                (reach-aux (cdr r) visited)])))
+      (reach-aux rules (list (sm-getstart dfa)))))) ;; "visited" only contains the start state by default
+
+(check-expect (reachable-states DFA1) '(D T V U S))
+
+;; path-to-final: sym, dfa -> (list-of-sym)
+;; Purpose: to return a list of all states in dfa that are on a path to the final states of dfa
+;; these are made final states in the prefix dfa, as any state not on a path to final would not be reached by a valid prefix
+(define (path-to-final dfa)
+  (let*
+      ((rules (sm-getrules dfa)) ;; list of rules of the dfa
+       (i (length (sm-getstates dfa))) ;; used to limit recursion depth
+       (reachable (reachable-states dfa)))
+    (local ((define (reach-aux r visited)
+              (cond
+                [(zero? i) visited]
+                [(empty? r) (begin
+                              (set! i (- i 1))
+                              (reach-aux rules visited))] ;; list of rules has been scanned, reset rules for another pass
+                [(and (member? (caddar r) visited) (not (member? (caar r) visited)) (member? (caar r) reachable)) (reach-aux (cdr r) (cons (caar r) visited))] ; found a member of visited pointing to a state not already visited
+                [else ;; did not find member of visited
+                 (reach-aux (cdr r) visited)])))
+      (reach-aux rules (sm-getfinals dfa)))))
+
+(check-expect (path-to-final B) '(Q0 Q1 Q2 Q3 Q4))
+(check-expect (path-to-final C) '(Q0 Q1))
+(check-expect (path-to-final D) '(Q0 Q1))
+(check-expect (path-to-final DFA1) '(U S V T))
+
+;; new-rules: (list-of-rules) (list-of-symbols) -> (list-of-rules)
+;; Purpose: to return a list of new rules that do not involve elements in los
+(define (new-rules lor los)
+    (if (null? lor) lor
+        (if (or (member? (caar lor) los) (member? (caddar lor) los)) (new-rules (cdr lor) los)
+            (cons (car lor) (new-rules (cdr lor) los)))))
+
+;; remove-silly: dfa -> grammar
+;; Purpose: to construct a dfa without silly rules
 (define (remove-silly dfa)
   (let*
       ((newrules (new-rules (sm-getrules dfa) (filter (lambda (x) (not (member? x (path-to-final dfa)))) (sm-getstates dfa)))))
-    (make-dfa
-     (path-to-final dfa)
-     (sm-getalphabet dfa)
-     (sm-getstart dfa)
-     (sm-getfinals dfa)
-     newrules
-     'no-dead)))
+    (sm->grammar
+     (make-dfa
+      (path-to-final dfa)
+      (sm-getalphabet dfa)
+      (sm-getstart dfa)
+      (sm-getfinals dfa)
+      newrules
+     'no-dead))))
 
-(define new-rules
-  (lambda (lor lou)
-    (if (null? lor) lor
-        (if (or (member? (caar lor) lou) (member? (caddar lor) lou)) (new-rules (cdr lor) lou)
-            (cons (car lor) (new-rules (cdr lor) lou))))))
+(check-expect (grammar-testequiv (sm->grammar B) (remove-silly B)) #t)
+(check-expect (grammar-testequiv (sm->grammar C) (remove-silly C)) #t)
+(check-expect (grammar-testequiv (sm->grammar D) (remove-silly D)) #t)
+(check-expect (grammar-testequiv (sm->grammar DFA1) (remove-silly DFA1)) #t)
 
 ;; PROOF
 ;; let A and B be grammars
@@ -141,4 +160,4 @@
 ;; {{A, k silly rules}, 1 silly rule} = {B, 1 silly rule}
 ;; Therefore: (remove-silly {B, 1 silly rule}) ==  A
 
-
+(test)
