@@ -2,7 +2,7 @@
 (require fsm)
 
 (define B
-  (make-ndfa '(Q0 Q1 Q2 Q3 Q4 Q5)
+  (make-dfa '(Q0 Q1 Q2 Q3 Q4 Q5)
              '(a b)
              'Q0
              '(Q4)
@@ -14,14 +14,14 @@
                (Q5 b Q4))))
 
 (define C
-  (make-ndfa '(Q0 Q1)
+  (make-dfa '(Q0 Q1)
              '(a b)
              'Q0
              '(Q1)
              '((Q0 a Q1))))
 
 (define D
-  (make-ndfa '(Q0 Q1 Q2 Q3)
+  (make-dfa '(Q0 Q1 Q2 Q3)
              '(a b)
              'Q0
              '(Q1)
@@ -41,12 +41,12 @@
       [(eqv? element (car lst)) #t]
       [else (member? element (cdr lst))])))
 
-;; reachable4: ndfa -> (list-of-sym)
-;; Purpose: to return a list of all reachable states from the start state of ndfa
-(define (reachable4 ndfa)
+;; reachable4: dfa -> (list-of-sym)
+;; Purpose: to return a list of all reachable states from the start state of dfa
+(define (reachable4 dfa)
   (let*
-      ((rules (sm-getrules ndfa)) ; list of rules of the ndfa
-       (i (length (sm-getstates ndfa)))) ; used to limit recursion depth
+      ((rules (sm-getrules dfa)) ; list of rules of the dfa
+       (i (length (sm-getstates dfa)))) ; used to limit recursion depth
     (local ((define (reach-aux r visited)
              (cond
                [(zero? i) visited]
@@ -58,17 +58,17 @@
                [(and (member? (caar r) visited) (not (member? (caddar r) visited))) (reach-aux (cdr r) (cons (caddar r) visited))]
                [else ;; did not find member of visited
                 (reach-aux (cdr r) visited)])))
-      (reach-aux rules (list (sm-getstart ndfa)))))) ;; "visited" only contains the start state by default
+      (reach-aux rules (list (sm-getstart dfa)))))) ;; "visited" only contains the start state by default
 
 
-;; path-to-final: sym, ndfa -> (list-of-sym)
-;; Purpose: to return a list of all states in ndfa that are on a path to the final states of ndfa
-;; these are made final states in the prefix ndfa, as any state not on a path to final would not be reached by a valid prefix
-(define (path-to-final ndfa)
+;; path-to-final: sym, dfa -> (list-of-sym)
+;; Purpose: to return a list of all states in dfa that are on a path to the final states of dfa
+;; these are made final states in the prefix dfa, as any state not on a path to final would not be reached by a valid prefix
+(define (path-to-final dfa)
   (let*
-      ((rules (sm-getrules ndfa)) ;; list of rules of the ndfa
-       (i (length (sm-getstates ndfa))) ;; used to limit recursion depth
-       (reachable (reachable4 ndfa)))
+      ((rules (sm-getrules dfa)) ;; list of rules of the dfa
+       (i (length (sm-getstates dfa))) ;; used to limit recursion depth
+       (reachable (reachable4 dfa)))
     (local ((define (reach-aux r visited)
               (cond
                 [(zero? i) visited]
@@ -78,26 +78,7 @@
                 [(and (member? (caddar r) visited) (not (member? (caar r) visited)) (member? (caar r) reachable)) (reach-aux (cdr r) (cons (caar r) visited))] ; found a member of visited pointing to a state not already visited
                 [else ;; did not find member of visited
                  (reach-aux (cdr r) visited)])))
-      (reach-aux rules (sm-getfinals ndfa)))))
-
-
-; ndfa -> listof sym
-; return a list of rules of ndfa not containing "silly" rules
-;(define (nonsilly ndfa)
-;  (let*
-;      ((silly (reachable4 ndfa))
-;       (res '())
-;       (rules (sm-getrules ndfa)))
-;    (cond
-;      [(empty? silly) res]
-;      [(member? 
-
-;(define (nonsilly-grammar ndfa)
-;  (sm->grammar (make-ndfa (reachable4 ndfa)
-;                          (sm-getalphabet ndfa)
-;                          (sm-getstart ndfa)
-;                          (sm-getfinals ndfa)
-;                          (returnsilly ndfa))))
+      (reach-aux rules (sm-getfinals dfa)))))
 
 (define DFA1 (make-dfa '(S U V T D)
                        '(a b)
@@ -114,34 +95,16 @@
                          (D a D)
                          (D b D))))
 
-(define (in-reach? x fa)
-  (not (member? x (path-to-final fa))))
-
-(define (sillystates ndfa)
-  (filter (in-reach? (sm-getstates ndfa) ndfa) (sm-getstates ndfa)))
-
-sillystates
-
-; listof sym listof sym -> bool
-; return true if any element of the first list appears in the second
-(define (member-aux? L1 L2)
-  (cond
-    [(empty? L1) #f]
-    [(member? (car L1) L2) #t]
-    [else (member-aux? (cdr L1) L2)]))
-
-(define (remove-silly ndfa)
+(define (remove-silly dfa)
   (let*
-      ((silly (filter (lambda (x) (not (member? x (path-to-final ndfa)))) (sm-getstates D)))
-       (rules (sm-getrules ndfa))
-       (newrules '()))
-    (local
-      [(define (remove-aux los lor)
-         (cond
-           [(empty? rules) newrules]
-           [(not (member-aux? silly rules)) (cons (car rules) newrules)] ; nonsilly rule found, added to newrules
-           [else (remove-aux los (cdr lor))]))]
-      (remove-aux silly rules))))
+      ((newrules (new-rules (sm-getrules dfa) (filter (lambda (x) (not (member? x (path-to-final dfa)))) (sm-getstates dfa)))))
+    (make-dfa
+     (path-to-final dfa)
+     (sm-getalphabet dfa)
+     (sm-getstart dfa)
+     (sm-getfinals dfa)
+     newrules
+     'no-dead)))
 
 (define new-rules
   (lambda (lor lou)
