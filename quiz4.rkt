@@ -2,14 +2,11 @@
 (require fsm)
 (require test-engine/racket-tests)
 
-; Problem Anal
+; Problem Analysis
 ; Stack is used to contain a's,
 ; either one or two a's are nondeterministically
 ; pushed onto the stack. When a b is encountered, the
-; top of the stack is popped. yeet?
-
-; Name the PDA
-; jeff
+; top of the stack is popped.
 
 ; Unit Tests
 (check-expect
@@ -69,8 +66,23 @@
 ; num b - num a in CI always 1 off length stack
 ; len ci - len s
 
+(define (fsa->ndpda fsa)
+  (make-ndpda
+   (sm-getstates fsa)
+   (sm-getalphabet fsa)
+   '()
+   (sm-getstart fsa)
+   (sm-getfinals fsa)
+   (converted-rules (sm-getrules fsa))))
 
-(define TWO-TWO-THREE-D
+(define (converted-rules lor)
+  (cond
+    [(empty? lor) '()]
+    [else (cons (converted-rules-aux (car lor)) (converted-rules (cdr lor)))]))
+
+(define (converted-rules-aux rule) (list (list (car rule) (cadr rule) EMP) (list (caddr rule) EMP)))
+
+(define NDFA1
   (make-ndfa '(Q0 Q1)
             '(a b)
             'Q0
@@ -81,34 +93,19 @@
               (Q1 a Q0)
               (Q1 b Q0))))
 
-(define (list-head lst n)
-  (reverse (list-tail (reverse lst) (- (length lst) n))))
+(define NDPDA1
+  (make-ndpda '(Q0 Q1)
+            '(a b)
+            '()
+            'Q0
+            '(Q0)
+            `(((Q0 a ,EMP) (Q0 ,EMP))
+              ((Q0 b ,EMP) (Q0 ,EMP))
+              ((Q0 b ,EMP) (Q1 ,EMP))
+              ((Q1 a ,EMP) (Q0 ,EMP))
+              ((Q1 b ,EMP) (Q0 ,EMP)))))
 
-(define (fsarules->pdarules lor)
-  (local
-    [(define (fsa-aux lor res)
-       (cond
-         [(empty? lor) res]
-         [else
-          (append (list-head (caar (sm-getrules  
-
-
-
-(define (fsa-ndpda fsa)
-  (make-ndpda
-   (sm-getrules fsa)
-   (sm-getalphabet fsa)
-   '()
-   (sm-getstart fsa)
-   (sm-getfinals fsa)
-   (sm-getrules fsa)))
-
-
-
-
-
-
-
-
+(check-expect (sm-testequiv? NDFA1 (fsa->ndpda NDFA1)) #t)
+(check-expect (sm-testequiv? NDPDA1 (fsa->ndpda NDFA1)) #t)
 
 (test)    
