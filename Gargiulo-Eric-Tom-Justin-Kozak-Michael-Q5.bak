@@ -17,14 +17,6 @@
    '(Q2 Q3)
    'Q2))
 
-(define (contains? lst t)
-  (cond
-    [(empty? lst) #f]
-    [(eq? (car lst) t) #t]
-    [else (contains? (cdr lst) t)]))
-
-(define (Q0-INV t i) (not (contains? (list-tail (reverse t) (- (length t) i)) 'a))) ;; 
-
 (define (Q1-INV t i) (eq? (list-ref t (- i 1)) 'a))
 
 (define (Q2-INV t i)
