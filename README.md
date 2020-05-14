@@ -1,5 +1,5 @@
 # Formal Languages
-Here are the assignments that we have done for Formal Languages.
+Here are the assignments that we have done for Formal Languages. If you are currently taking this class, we suggest you either go to the professor's office hours or shoot him an e-mail.
 
 ### Contributors:
 [Eric Gargiulo](https://github.com/gargiuer)  
